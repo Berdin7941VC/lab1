@@ -3,8 +3,13 @@
 #include <string>
 
 class Heroes {
+public:
     virtual void setName(std::string name) = 0;
     virtual std::string getName() = 0;
+    virtual void printInfo() = 0;
+
+private:
+    std::string name;
 };
 
 
