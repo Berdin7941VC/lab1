@@ -53,3 +53,30 @@ void Hero::printInfo() {
         std::cout << abilities[tempAbility - 1] << "\n\n";
     }
 }
+
+void Hero::saveToFile(std::ofstream& _output) {
+    _output << "1\n";
+    _output << this->name << "\n";
+    _output << this->weaponType << "\n";
+    _output << this->tempAbility << "\n";
+    _output << this->abilitySize << "\n";
+    for(int i=0;i<this->tempAbility;i++)
+        _output << this->abilities[i] << "\n";
+}
+
+void Hero::getFromFile(std::ifstream& _input) {
+    std::string temp;
+    int abilityNumber = 0;
+    std::getline(_input, temp);
+    this->name = temp;
+    std::getline(_input, temp);
+    this->weaponType = temp;
+    std::getline(_input, temp);
+    abilityNumber = std::stoi(temp);
+    std::getline(_input, temp);
+    this->abilitySize = std::stoi(temp);
+    for(int i=0;i<abilityNumber;i++) {
+        std::getline(_input, temp);
+        setAbility(temp);
+    }
+}

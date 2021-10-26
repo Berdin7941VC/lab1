@@ -9,6 +9,9 @@
 #include "Enemy.h"
 #include "Monster.h"
 
+struct Data{
+};
+
 class Keeper {
 public:
     Keeper();
@@ -19,11 +22,13 @@ public:
     void firstDataProcessing(int chooseMode);
     void addHeroToArray(Heroes* heroes);
     void printInfo();
+    void clearHeroes();
 
 private:
     Heroes** heroesKeeper;
     int tempKeep = 0;
     int arraySize = 0;
+    int* saveArray;
 };
 
 

@@ -21,11 +21,12 @@ int main(){
         printFirstInformation();
         std::cout << "Write a number: ";
         std::cin >> choicer;
+        std::cout << "\n";
         if(choicer == 6) {
             std::cout << "Bye\n";
             break;
         }
         keeper.firstDataProcessing(choicer);
-    }
+        }
     return 0;
 }
