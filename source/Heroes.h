@@ -4,9 +4,11 @@
 
 class Heroes {
 public:
+    virtual ~Heroes() = default;
     virtual void setName(std::string name) = 0;
     virtual std::string getName() = 0;
     virtual void printInfo() = 0;
+    virtual void changeInfo() = 0;
     virtual void saveToFile(std::ofstream& _output) = 0;
     virtual void getFromFile(std::ifstream& _input) = 0;
 

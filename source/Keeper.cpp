@@ -1,10 +1,16 @@
 #include "Keeper.h"
 
 Keeper::Keeper() {
-    std::cout << "Call a simple constructor\n";
-    heroesKeeper = new Heroes*[10];
-    arraySize = 10;
-    saveArray = new int[10];
+    std::cout << "Object Keeper. Call a simple constructor\n";
+    this->heroesKeeper = new Heroes*[10];
+    this->arraySize = 10;
+}
+
+Keeper::~Keeper() {
+    std::cout << "Object Keeper. Call destructor\n";
+    for(int i=0;i<this->tempKeep;i++)
+        delete this->heroesKeeper[i];
+    delete [] this->heroesKeeper;
 }
 
 void Keeper::addHero() {
@@ -17,15 +23,16 @@ void Keeper::addHero() {
     std::cin >> chooser;
     switch (chooser) {
         case 1 : {
-            Hero *newHero = new Hero();
             std::string heroName;
             std::string heroWeaponType;
+
             std::cout << "\nWrite hero name: ";
             std::cin >> heroName;
             std::cout << "Write hero weapon type: ";
             std::cin >> heroWeaponType;
-            newHero->setName(heroName);
-            newHero->setWeapon(heroWeaponType);
+
+            Hero* newHero = new Hero(heroName, heroWeaponType);
+
             while (true) {
                 std::string ability;
                 int yesNo;
@@ -39,17 +46,17 @@ void Keeper::addHero() {
                 else
                     break;
             }
-            saveArray[tempKeep] = 1;
+
             this->addHeroToArray(newHero);
             break;
         }
 
         case 2: {
-            Enemy *newEnemy = new Enemy();
             std::string enemyName;
             std::string enemyWeaponType;
             std::string enemyCrime;
             std::string enemyHabitat;
+
             std::cout << "\nWrite enemy name: ";
             std::cin >> enemyName;
             std::cout << "Write enemy weapon type: ";
@@ -58,10 +65,9 @@ void Keeper::addHero() {
             std::cin >> enemyCrime;
             std::cout << "Write enemy habitat: ";
             std::cin >> enemyHabitat;
-            newEnemy->setName(enemyName);
-            newEnemy->setWeapon(enemyWeaponType);
-            newEnemy->setCrimeType(enemyCrime);
-            newEnemy->setHabitat(enemyHabitat);
+
+            Enemy* newEnemy = new Enemy(enemyName, enemyWeaponType, enemyCrime, enemyHabitat);
+
             while (true) {
                 std::string ability;
                 int yesNo;
@@ -75,24 +81,25 @@ void Keeper::addHero() {
                 else
                     break;
             }
-            saveArray[tempKeep] = 2;
+
             this->addHeroToArray(newEnemy);
             break;
         }
         case 3:{
-            Monster *newMonster = new Monster();
             std::string monsterName;
             std::string monsterDescribe;
             std::cout << "\nWrite monster name: ";
             std::cin >> monsterName;
-            std::cout << "Describe monster: ";
+            std::cout << "Describe monster(one word): ";
             std::cin >> monsterDescribe;
-            newMonster->setName(monsterName);
-            newMonster->setDescribe(monsterDescribe);
-            saveArray[tempKeep] = 3;
+
+            Monster *newMonster = new Monster(monsterName, monsterDescribe);
+
             this->addHeroToArray(newMonster);
             break;
         }
+        default:
+            std::cerr << "Error: Unknown type of Heroes!\n";
     }
 }
 
@@ -100,14 +107,22 @@ void Keeper::removeHero() {
     int number;
     std::cout << "Enter number of Hero what you want to delete: ";
     std::cin >> number;
-    if(number > tempKeep || number < 1) {
-        std::cout << "Wrong hero number\n";
-        return;
-    }
-    delete heroesKeeper[number-1];
-    for(int i = number-1;i<tempKeep;i++)
-        heroesKeeper[i] = heroesKeeper[i+1];
-    tempKeep--;
+    if(number > this->tempKeep || number < 1)
+        std::cerr << "Error: Wrong hero number\n";
+    delete this->heroesKeeper[number-1];
+    for(int i = number-1;i<this->tempKeep;i++)
+        this->heroesKeeper[i] = this->heroesKeeper[i+1];
+    this->tempKeep--;
+}
+
+void Keeper::changeInfo() {
+    int tempHero;
+    std::cout << "Print a number of Heroes: ";
+    std::cin >> tempHero;
+    std::cout << "\n";
+    if(tempHero > this->tempKeep || tempHero < 0)
+        std::cerr << "Error: Hero with this number is doesn't exists\n";
+    this->heroesKeeper[tempHero-1]->changeInfo();
 }
 
 void Keeper::saveClassInFile() {
@@ -116,7 +131,7 @@ void Keeper::saveClassInFile() {
     output << this->tempKeep << "\n";
     output << this->arraySize << "\n";
     for(int i=0;i < tempKeep;i++)
-        heroesKeeper[i]->saveToFile(output);
+        this->heroesKeeper[i]->saveToFile(output);
     output.close();
 }
 
@@ -125,6 +140,8 @@ void Keeper::getClassFromFile() {
     std::ifstream input;
     int heroesNumber;
     input.open("save");
+    if(!input.is_open())
+        throw std::invalid_argument("File is not exists!\n");
     std::string temp;
     std::getline(input, temp);
     heroesNumber = std::stoi(temp);
@@ -153,12 +170,42 @@ void Keeper::getClassFromFile() {
                     this->addHeroToArray(monster);
                     break;
                 }
+                default:
+                    throw std::invalid_argument("Unknown type of Heroes in save file!\n");
             }
         }
         else
-            break;
+            throw std::out_of_range("Unexpected EOF\n");
     }
     input.close();
+}
+
+void Keeper::printInfo() {
+    if(this->tempKeep == 0){
+        std::cerr << "Error: You have not heroes\n";
+        return;
+    }
+    for(int i=0;i<this->tempKeep;i++) {
+        std::cout << i + 1 << ".\n";
+        this->heroesKeeper[i]->printInfo();
+    }
+}
+
+void Keeper::addHeroToArray(Heroes* heroes) {
+    if(this->tempKeep == this->arraySize-1){
+        this->heroesKeeper[this->tempKeep] = heroes;
+        Heroes** newArray = new Heroes*[this->arraySize+10];
+        for(int i=0;i<this->arraySize;i++)
+            newArray[i] = this->heroesKeeper[i];
+        delete[] this->heroesKeeper;
+        this->heroesKeeper = newArray;
+        this->arraySize += 10;
+        this->tempKeep++;
+    }
+    else {
+        this->heroesKeeper[this->tempKeep] = heroes;
+        this->tempKeep++;
+    }
 }
 
 void Keeper::firstDataProcessing(int chooseMode) {
@@ -170,54 +217,23 @@ void Keeper::firstDataProcessing(int chooseMode) {
             this->removeHero();
             break;
         case 3:
-            this->saveClassInFile();
+            this->changeInfo();
             break;
         case 4:
-            this->getClassFromFile();
+            this->saveClassInFile();
             break;
         case 5:
+            this->getClassFromFile();
+            break;
+        case 6:
             this->printInfo();
             break;
         default:
-            std::cout << "Wrong choose-number";
-            break;
-    }
-}
-
-void Keeper::addHeroToArray(Heroes* heroes) {
-    if(tempKeep == arraySize-1){
-        heroesKeeper[tempKeep] = heroes;
-        Heroes** newArray = new Heroes*[arraySize+10];
-        for(int i=0;i<arraySize;i++)
-            newArray[i] = heroesKeeper[i];
-        delete[] heroesKeeper;
-        heroesKeeper = newArray;
-        arraySize += 10;
-        int* newSaveArray = new int[arraySize];
-        for(int i=0;i<tempKeep;i++)
-            newSaveArray[i] = saveArray[i];
-        delete[] saveArray;
-        saveArray = newSaveArray;
-        tempKeep++;
-    }
-    else {
-        heroesKeeper[tempKeep] = heroes;
-        tempKeep++;
-    }
-}
-
-void Keeper::printInfo() {
-    if(tempKeep == 0){
-        std::cout << "You have not heroes\n";
-        return;
-    }
-    for(int i=0;i<tempKeep;i++) {
-        std::cout << i + 1 << ".\n";
-        heroesKeeper[i]->printInfo();
+            std::cerr << "Error: Wrong number. Number should be from 1 to 7!";
     }
 }
 
 void Keeper::clearHeroes() {
-    for(int i=0;i<tempKeep;i++)
-        delete heroesKeeper[i];
+    for(int i=0;i<this->tempKeep;i++)
+        delete this->heroesKeeper[i];
 }

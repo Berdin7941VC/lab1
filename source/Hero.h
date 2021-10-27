@@ -5,23 +5,26 @@
 #include <fstream>
 #include "Heroes.h"
 
-struct HeroData{
-    std::string _name;
-    std::string _weaponType;
-};
-
 class Hero : public Heroes{
 public:
     Hero();
-    std::string getName() override;
-    void setName(std::string _name) override;
+    Hero(std::string _name, std::string _weaponType);
+    Hero(const Hero& hero);
+    ~Hero();
     void printInfo() override;
+    void changeInfo() override;
     void saveToFile(std::ofstream& _output) override;
     void getFromFile(std::ifstream& _input) override;
-    std::string getWeapon();
+    void setName(std::string _name) override;
+    std::string getName() override;
     void setWeapon(std::string _weapon);
-    std::string* getAbility();
+    std::string getWeapon();
     void setAbility(std::string _ability);
+    std::string* getAbility();
+    void setTempAbility(int _tempAbility);
+    int getTempAbility();
+    void setAbilitySize(int _abilitySize);
+    int getAbilitySize();
 private:
     std::string name;
     std::string weaponType;
